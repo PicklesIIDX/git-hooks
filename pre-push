@@ -1,0 +1,43 @@
+#!/bin/sh
+flag_test=$(git config hooks.flags.tests)
+
+if [ -n $flag_test ] && [ "$flag_test" = "true" ]; then
+	echo "running tests"
+	sh ./run-tests.sh
+	if [ $? -ne 0 ]; then
+		echo "ERROR: failed running tests"
+		exit 1;
+	fi
+fi
+exit 0;
+# runs tests and pushes package before pushing
+if [ -z "${SOLUTION_DIRECTORY}" ]; then
+	echo "[Pre Merge] ERROR: Missing environment variable SOLUTION_DIRECTORY."
+	exit 3;
+fi
+echo "[Pre Merge] OPERATION: Running supreme solution tests"
+dotnet test ${SOLUTION_DIRECTORY} --nologo -v m
+
+if [ $? -ne 0 ]; then
+    echo "[Pre Merge] ERROR: Will not push due to failing tests"
+    exit 1;
+fi
+
+echo "[Pre Merge] OPERATION: Retrieving BaGetter Api Key"
+if [ -z "${APIKEY}" ]; then
+	echo "[Pre Merge] ERROR: Missing environment variable APIKEY."
+	exit 2;
+fi
+echo "[Pre Merge] OPERATION: Retrieving version"
+VERSION=$(grep "<Version>" ${SOLUTION_DIRECTORY}/wk/wk.csproj | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
+if [ -z "${VERSION}" ]; then
+	echo "[Pre Merge] ERROR: Failed to extract Version from ${SOLUTION_DIRECTORY}"
+	exit 4;
+fi
+echo "[Pre Merge] OPERATION: Uploading package"
+dotnet nuget push -s http://raisin:5555/v3/index.json ${SOLUTION_DIRECTORY}/Packages/wk.${VERSION}.nupkg --api-key ${APIKEY}
+if [ $? -ne 0 ]; then
+	echo "[Pre Merge] ERROR: Will not push due to package upload failing."
+	exit 5;
+fi
+echo "[Pre Merge] SUCCESS: Continuing with merge..."
