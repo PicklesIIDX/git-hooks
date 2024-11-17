@@ -1,13 +1,25 @@
 #!/bin/sh
 flag_test=$(git config flags.run-tests)
+flag_extract_version=$(git config flags.extract-version)
 
 if [ -n $flag_test ] && [ "$flag_test" = "true" ]; then
-	echo "running tests"
-	sh ./run-dotnet-tests.sh
+	echo "running tests..."
+	result=$(./run-dotnet-tests.sh | tee /dev/tty)
 	if [ $? -ne 0 ]; then
-		echo "ERROR: failed running tests"
+		echo "ERROR: failed running tests with error code: $?"
 		exit 1;
 	fi
+fi
+
+if [ -n $flag_extract_version ] && [ "$flag_extract_version" = "true" ]; then
+	echo "extracting version..."
+	result=$(./extract-dotnet-project-version.sh)
+	if [ $? -ne 0 ]; then
+		echo "ERROR: failed extracting version with error code: $?"
+		exit 2;
+	fi
+	version=$result
+	echo "Extracted version '$version'"
 fi
 exit 0;
 
