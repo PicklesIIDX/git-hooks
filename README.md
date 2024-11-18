@@ -55,7 +55,3 @@ A git config variable. The absolute path to the nuget package including it's nam
 
 ### $1
 The first argument provided into the script. The version number of the package being uploaded.
-
-
-# todo
-- [ ] write instructions on how to bind hooks to another git repository
