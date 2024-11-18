@@ -1,6 +1,14 @@
 # git-hooks
 A collection of git-hooks to be shared across multiple repositories.
 
+# usage
+- clone this repo
+- navigate to the local git repo you want to use these hooks
+- update your local git config to point its hooks to this repository's location
+-- see https://git-scm.com/docs/git-config#Documentation/git-config.txt-corehooksPath
+- update your local git config to include values for the hook variables you intend to use (see below)
+
+
 # hooks
 
 ## pre-push
