@@ -50,5 +50,4 @@ The first argument provided into the script. The version number of the package b
 
 
 # todo
-- [ ] extract nuget package upload
 - [ ] write instructions on how to bind hooks to another git repository
