@@ -8,10 +8,13 @@ This performs a number of optional steps before pushing code to a repository.
 The options are controlled by flags that are set in your local git configuration.
 
 ### `flags.run-tests`
-If true will run the `run-dotnet-tests.sh` script.
+A git config variable. If true will run the `run-dotnet-tests.sh` script.
 
 ### `flags.extract-version`
-If true will run the `extract-dotnet-project-version` script.
+A git config variable. If true will run the `extract-dotnet-project-version` script.
+
+### `flags.push-to-nuget`
+A git config variable. If true will run the `nuget-push` script. Requires the `flags.extract-version` flag to be true.
 
 # sub programs
 These are small scripts that are called by the various hooks.
@@ -20,7 +23,7 @@ These are small scripts that are called by the various hooks.
 This runs dotnet tests for a given solution.
 
 ### `hook-vars.test-solution-directory`
-The absolute path to the directory that stores either:
+A git config variable. The absolute path to the directory that stores either:
 - the solution directory that contains one or more test projects
 - the project directory for a test project
 
@@ -28,7 +31,23 @@ The absolute path to the directory that stores either:
 This retrieves a version number from a csharp project file.
 
 ### `hook-vars.version-project-file`
-The absolute path that points to the project file to extract its version.
+A git config variable. The absolute path that points to the project file to extract its version.
+
+## nuget-push
+Pushes a compiled csharp project's nuget package to a package repository
+
+### `hook-vars.nuget-address`
+A git config variable. The address of the nuget repository.
+
+### `hook-vars.nuget-api-key`
+A git config variable. The api key required to push to the nuget repository.
+
+### `hook-vars.package-file-path`
+A git config variable. The absolute path to the nuget package including it's name, but without the `.version.nupkg` suffix.
+
+### $1
+The first argument provided into the script. The version number of the package being uploaded.
+
 
 # todo
 - [ ] extract nuget package upload

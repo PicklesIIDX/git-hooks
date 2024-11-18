@@ -1,6 +1,7 @@
 #!/bin/sh
 flag_test=$(git config flags.run-tests)
 flag_extract_version=$(git config flags.extract-version)
+flag_push_to_nuget=$(git config flags.push-to-nuget)
 
 if [ -n $flag_test ] && [ "$flag_test" = "true" ]; then
 	echo "running tests..."
@@ -21,23 +22,16 @@ if [ -n $flag_extract_version ] && [ "$flag_extract_version" = "true" ]; then
 	version=$result
 	echo "Extracted version '$version'"
 fi
+
+if [ -n $flag_extract_version ] && [ "$flag_extract_version" = "true" ]; then
+	echo "pushing to nuget..."
+	result=$(./nuget-push.sh $version | tee /dev/tty)
+	if [ $? -ne 0 ]; then
+		echo "ERROR: failed pushing to nuget with error code: $?"
+		exit 3;
+	fi
+fi
 exit 0;
 
-echo "[Pre Merge] OPERATION: Retrieving BaGetter Api Key"
-if [ -z "${APIKEY}" ]; then
-	echo "[Pre Merge] ERROR: Missing environment variable APIKEY."
-	exit 2;
-fi
-echo "[Pre Merge] OPERATION: Retrieving version"
-VERSION=$(grep "<Version>" ${SOLUTION_DIRECTORY}/wk/wk.csproj | sed -E 's/.*<Version>([^<]+)<\/Version>.*/\1/')
-if [ -z "${VERSION}" ]; then
-	echo "[Pre Merge] ERROR: Failed to extract Version from ${SOLUTION_DIRECTORY}"
-	exit 4;
-fi
-echo "[Pre Merge] OPERATION: Uploading package"
-dotnet nuget push -s http://raisin:5555/v3/index.json ${SOLUTION_DIRECTORY}/Packages/wk.${VERSION}.nupkg --api-key ${APIKEY}
-if [ $? -ne 0 ]; then
-	echo "[Pre Merge] ERROR: Will not push due to package upload failing."
-	exit 5;
-fi
-echo "[Pre Merge] SUCCESS: Continuing with merge..."
+
+echo "[Pre Merge] SUCCESS: Continuing with push..."
